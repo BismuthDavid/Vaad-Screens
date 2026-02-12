@@ -4,12 +4,12 @@ services:
   # Database Service
   db:
     image: postgres:15-alpine
-    container_name: building_saas_db
+    container_name: vaad_screens_db
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=building_saas_dev
+      - POSTGRES_DB=vaad_screens_dev
     ports:
       - "5432:5432"
     volumes:
