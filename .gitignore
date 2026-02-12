@@ -1,0 +1,27 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.pytest_cache/
+
+# Environment Variables (CRITICAL)
+.env
+.env.local
+.env.*.local
+
+# Docker & Database
+postgres_data/
+
+# IDEs
+.vscode/
+.idea/
+
+# Frontend (Node)
+node_modules/
+dist/
+build/
+.DS_Store
