@@ -32,6 +32,9 @@ def create_app(config_name='default'):
     from app.api.announcements import announcements_bp
     app.register_blueprint(announcements_bp, url_prefix='/api/announcements')
 
+    from app.api.buildings import buildings_bp
+    app.register_blueprint(buildings_bp, url_prefix='/api/buildings')
+
     # נקודת קצה לבדיקת שפיות ותקינות השירות (Health Check) - משמש למוניטורינג ותשתיות ענן
     @app.route('/health')
     def health_check():

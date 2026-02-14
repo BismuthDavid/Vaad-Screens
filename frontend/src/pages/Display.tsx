@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import { AlertTriangle, Info } from 'lucide-react';
+import WeatherWidget from '../components/WeatherWidget';
 
 interface Announcement {
   id: string;
@@ -13,21 +14,32 @@ interface Announcement {
 export default function Display() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [city, setCity] = useState('תל אביב');
 
-  // פונקציה לשליפת ההודעות (אותה פונקציה כמו בדאשבורד)
-  const fetchAnnouncements = async () => {
+  const fetchData = async () => {
     try {
-      const response = await apiClient.get('/announcements/');
-      setAnnouncements(response.data);
+      // מביאים גם את ההודעות וגם את ההגדרות במקביל
+      const [announcementsRes, settingsRes] = await Promise.all([
+        apiClient.get('/announcements/'),
+        apiClient.get('/buildings/settings')
+      ]);
+      setAnnouncements(announcementsRes.data);
+      setCity(settingsRes.data.city);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error('Error fetching data:', error);
     }
   };
 
+  useEffect(() => {
+    fetchData(); // קוראים לפונקציה החדשה
+    const dataInterval = setInterval(fetchData, 60000);
+    return () => clearInterval(dataInterval);
+  }, []);
+
   // אפקט 1: שליפת נתונים בעליית המסך ורענון כל דקה
   useEffect(() => {
-    fetchAnnouncements();
-    const dataInterval = setInterval(fetchAnnouncements, 60000); // מתעדכן לבד כל 60 שניות!
+    fetchData();
+    const dataInterval = setInterval(fetchData, 60000); // מתעדכן לבד כל 60 שניות!
     return () => clearInterval(dataInterval);
   }, []);
 
@@ -55,8 +67,13 @@ export default function Display() {
           <h1 className="text-4xl font-black text-blue-400 tracking-tight">לוח הודעות הבניין</h1>
           <p className="text-xl text-slate-400 mt-2">{formattedDate}</p>
         </div>
-        <div className="text-6xl font-light tabular-nums tracking-tight">
-          {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+        
+        {/* אזור הווידג'טים השמאלי */}
+        <div className="flex items-center gap-10">
+          <WeatherWidget city={city} />
+          <div className="text-7xl font-light tabular-nums tracking-tight text-white border-r-2 border-slate-700 pr-10">
+            {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+          </div>
         </div>
       </header>
 

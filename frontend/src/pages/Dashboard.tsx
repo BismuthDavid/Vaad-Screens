@@ -1,10 +1,11 @@
 // frontend/src/pages/Dashboard.tsx
 import { useEffect, useState } from 'react';
-import { LogOut, Bell, PlusCircle, Trash2, MonitorPlay} from 'lucide-react';
+import { LogOut, Bell, PlusCircle, Trash2, MonitorPlay, Settings} from 'lucide-react';
 import { Link } from 'react-router-dom'; 
 import { apiClient } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import NewAnnouncementModal from '../components/NewAnnouncementModal';
+import SettingsModal from '../components/SettingsModal';
 
 interface Announcement {
   id: string;
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const fetchAnnouncements = async () => {
     try {
@@ -65,6 +67,13 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors font-medium"
+          >
+            <Settings size={20} />
+            <span>הגדרות</span>
+          </button>
           <Link 
             to="/display" 
             target="_blank" // פותח בלשונית חדשה!
@@ -144,6 +153,10 @@ export default function Dashboard() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={fetchAnnouncements} 
+      />
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
     </div>
   );
