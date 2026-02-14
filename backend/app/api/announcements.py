@@ -40,3 +40,23 @@ def create_announcement():
     db.session.commit()
     
     return jsonify(new_announcement.to_dict()), 201
+
+@announcements_bp.route('/<string:announcement_id>', methods=['DELETE'])
+@token_required
+def delete_announcement(announcement_id):
+    """מחיקת הודעה (Soft Delete)"""
+    
+    # חיפוש ההודעה - אנחנו מוודאים שהיא שייכת לבניין של המשתמש כדי למנוע מחיקה זדונית
+    announcement = Announcement.query.filter_by(
+        id=announcement_id,
+        building_id=g.building_id
+    ).first()
+
+    if not announcement:
+        return jsonify({'message': 'Announcement not found or unauthorized'}), 404
+
+    # שינוי סטטוס ללא-פעיל (במקום מחיקה פיזית)
+    announcement.is_active = False
+    db.session.commit()
+
+    return jsonify({'message': 'Announcement deleted successfully'}), 200

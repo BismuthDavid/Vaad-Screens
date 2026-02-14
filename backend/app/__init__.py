@@ -2,6 +2,7 @@
 from flask import Flask
 from app.config import config
 from app.extensions import db, migrate
+from flask_cors import CORS
 
 def create_app(config_name='default'):
     """
@@ -13,6 +14,9 @@ def create_app(config_name='default'):
     
     # טעינת תצורת האפליקציה (Configuration) בהתאם לסביבת הריצה המוגדרת
     app.config.from_object(config[config_name])
+
+    # אתחול CORS שמאפשר ל-Frontend (localhost:5173) לגשת ל-API שלנו
+    CORS(app, resources={r"/api/*": {"origins": "*"}}) # <--- הוספת הגדרת CORS
 
     # אתחול תוספי מערכת (Extensions) מול מופע האפליקציה הנוכחי
     db.init_app(app)
