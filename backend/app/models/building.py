@@ -8,6 +8,7 @@ class Building(BaseModel):
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(255), nullable=True)
     city = db.Column(db.String(100), nullable=True)
+    news_feed = db.Column(db.String(50), default='rotter')
     
     # הגדרות תצוגה ברירת מחדל (נשמור כ-JSON)
     settings = db.Column(db.JSON, default=lambda: {

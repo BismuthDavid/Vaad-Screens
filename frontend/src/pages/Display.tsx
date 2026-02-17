@@ -1,8 +1,11 @@
 // frontend/src/pages/Display.tsx
 import { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
-import { AlertTriangle, Info } from 'lucide-react';
 import WeatherWidget from '../components/WeatherWidget';
+import ShabbatWidget from '../components/ShabbatWidget';
+import NewsTicker from '../components/NewsTicker';
+import AnnouncementCarousel from '../components/AnnouncementCarousel'; // <--- הייבוא החדש
+import { Building2 } from 'lucide-react'; // אייקון נחמד למסך הפתיחה
 
 interface Announcement {
   id: string;
@@ -15,41 +18,41 @@ export default function Display() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [city, setCity] = useState('תל אביב');
+  const [newsFeed, setNewsFeed] = useState('rotter');
+  const [address, setAddress] = useState('');
+
+  const isShabbatMode = () => {
+    const day = currentTime.getDay();
+    const hour = currentTime.getHours();
+    return (day === 5 && hour >= 12) || (day === 6);
+  };
 
   const fetchData = async () => {
     try {
-      // מביאים גם את ההודעות וגם את ההגדרות במקביל
       const [announcementsRes, settingsRes] = await Promise.all([
         apiClient.get('/announcements/'),
         apiClient.get('/buildings/settings')
       ]);
       setAnnouncements(announcementsRes.data);
       setCity(settingsRes.data.city);
+      setNewsFeed(settingsRes.data.news_feed || 'rotter');
+      setAddress(settingsRes.data.address || '')
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
   useEffect(() => {
-    fetchData(); // קוראים לפונקציה החדשה
+    fetchData();
     const dataInterval = setInterval(fetchData, 60000);
     return () => clearInterval(dataInterval);
   }, []);
 
-  // אפקט 1: שליפת נתונים בעליית המסך ורענון כל דקה
-  useEffect(() => {
-    fetchData();
-    const dataInterval = setInterval(fetchData, 60000); // מתעדכן לבד כל 60 שניות!
-    return () => clearInterval(dataInterval);
-  }, []);
-
-  // אפקט 2: עדכון השעון כל שנייה
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // עיצוב תאריך בעברית
   const formattedDate = new Intl.DateTimeFormat('he-IL', {
     weekday: 'long',
     year: 'numeric',
@@ -58,17 +61,16 @@ export default function Display() {
   }).format(currentTime);
 
   return (
-    // רקע כהה מותאם למסכי טלוויזיה (Dark Mode)
     <div className="min-h-screen bg-slate-900 text-white flex flex-col overflow-hidden" dir="rtl">
       
-      {/* פאנל עליון - שעון ומידע */}
-      <header className="bg-slate-800 border-b border-slate-700 px-10 py-6 flex justify-between items-center shadow-lg">
+      <header className="bg-slate-800 border-b border-slate-700 px-10 py-6 flex justify-between items-center shadow-lg z-10">
         <div>
-          <h1 className="text-4xl font-black text-blue-400 tracking-tight">לוח הודעות הבניין</h1>
+          <h1 className="text-4xl font-black text-blue-400 tracking-tight">
+            {address || 'לוח הודעות הבניין'}
+          </h1>
           <p className="text-xl text-slate-400 mt-2">{formattedDate}</p>
         </div>
         
-        {/* אזור הווידג'טים השמאלי */}
         <div className="flex items-center gap-10">
           <WeatherWidget city={city} />
           <div className="text-7xl font-light tabular-nums tracking-tight text-white border-r-2 border-slate-700 pr-10">
@@ -77,49 +79,32 @@ export default function Display() {
         </div>
       </header>
 
-      {/* אזור ההודעות */}
-      <main className="flex-1 p-10 overflow-hidden flex flex-col gap-8">
-        {announcements.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 opacity-50">
-            <Info size={100} className="mb-6" />
-            <h2 className="text-4xl font-light">אין הודעות פעילות כרגע</h2>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-max h-full">
-            {announcements.map((msg) => (
-              <div 
-                key={msg.id} 
-                className={`rounded-3xl p-8 shadow-2xl border-l-8 flex flex-col transition-all transform hover:scale-[1.02] ${
-                  msg.priority === 'HIGH' 
-                    ? 'bg-red-950/40 border-red-500' 
-                    : 'bg-slate-800/50 border-blue-500'
-                }`}
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  {msg.priority === 'HIGH' ? (
-                    <AlertTriangle className="text-red-500" size={40} />
-                  ) : (
-                    <Info className="text-blue-400" size={40} />
-                  )}
-                  <h2 className={`text-4xl font-bold ${msg.priority === 'HIGH' ? 'text-red-400' : 'text-slate-100'}`}>
-                    {msg.title}
-                  </h2>
-                </div>
-                <p className="text-3xl leading-relaxed text-slate-300 whitespace-pre-wrap mt-4 font-light">
-                  {msg.content}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+
+      <main className="flex-1 p-8 grid grid-cols-12 gap-8 overflow-hidden bg-slate-950/50">
+        
+        {/* צד ימין - הודעות הוועד (4 מתוך 12 עמודות = שליש מסך) */}
+        <div className="col-span-4 h-full bg-slate-800/40 rounded-[2.5rem] p-6 border border-slate-700/50 shadow-inner overflow-hidden">
+          <AnnouncementCarousel announcements={announcements} />
+        </div>
+
+        {/* צד שמאל - אזור מדיה / שבת (8 מתוך 12 עמודות = שני שליש מסך) */}
+        <div className="col-span-8 h-full bg-slate-800/20 rounded-[2.5rem] border border-slate-700/30 flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+          {isShabbatMode() ? (
+            <ShabbatWidget city={city} />
+          ) : (
+            // תצוגת יום חול - פלייסבולדר יפהפה שמשאיר מקום לתמונות/וידאו בעתיד
+            <div className="text-center animate-in fade-in zoom-in duration-1000">
+               <div className="text-blue-500/20 mb-8 flex justify-center drop-shadow-lg">
+                 <Building2 size={180} strokeWidth={1} />
+               </div>
+               <h2 className="text-6xl font-light text-slate-300 mb-6 tracking-tight">ברוכים הבאים</h2>
+            </div>
+          )}
+        </div>
+
       </main>
 
-      {/* פס גלילה תחתון (Ticker) - הכנה לפיצ'רים עתידיים כמו מבזקי חדשות או מזג אוויר */}
-      <footer className="bg-blue-600 text-white text-xl py-3 px-6 whitespace-nowrap overflow-hidden">
-        <div className="animate-pulse">
-          המערכת פועלת כסדרה • נעים לראות אתכם! • Vaad-Screens
-        </div>
-      </footer>
+      <NewsTicker feedKey={newsFeed} />
     </div>
   );
 }
