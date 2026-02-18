@@ -49,28 +49,38 @@
 ```bash
 git clone [https://github.com/your-username/Vaad-Screens.git](https://github.com/your-username/Vaad-Screens.git)
 cd Vaad-Screens
+```
+
 2. התקנת צד שרת (Backend)
 ניכנס לתיקיית השרת, ניצור סביבה וירטואלית ונתקין תלויות.
 
-Bash
+```Bash
 cd backend
+```
 
 # יצירת סביבה וירטואלית (Windows)
+```Bash
 python -m venv venv
 venv\Scripts\activate
+```
 
 # התקנת החבילות
+```Bash
 pip install -r requirements.txt
+```
+
 הגדרת מסד הנתונים:
 יש להריץ את המיגרציות כדי ליצור את הטבלאות (users, announcements, buildings).
 
-Bash
+```Bash
 flask db upgrade
+```
+
 יצירת משתמש אדמין ראשוני:
 יש להריץ את הסקריפט (או הפקודה) ליצירת המשתמש הראשון (אם לא קיים סיד אוטומטי):
 (באופן זמני ניתן להשתמש ב-Flask Shell)
 
-Bash
+```Bash
 flask shell
 >>> from app.extensions import db
 >>> from app.models.user import User
@@ -79,23 +89,31 @@ flask shell
 >>> db.session.add(u)
 >>> db.session.commit()
 >>> exit()
+```
+
 הרצת השרת:
 
-Bash
+```Bash
 flask run
+```
+
 השרת ירוץ כעת על http://localhost:5000
 
 3. התקנת צד לקוח (Frontend)
 פתח טרמינל חדש (אל תסגור את השרת), ונווט לתיקיית הלקוח.
 
-Bash
+```Bash
 cd frontend
-
+```
 # התקנת חבילות Node
+```Bash
 npm install
+```
 
 # הרצת סביבת הפיתוח
+```Bash
 npm run dev
+```
 האפליקציה תרוץ כעת על http://localhost:5173
 
 📱 מדריך למשתמש
@@ -111,7 +129,8 @@ npm run dev
 (מומלץ ללחוץ F11 לתצוגת מסך מלא בטלוויזיה)
 
 📂 מבנה הפרויקט
-Plaintext
+
+```Bash
 Vaad-Screens/
 ├── backend/                # צד שרת (Python/Flask)
 │   ├── app/
@@ -128,6 +147,7 @@ Vaad-Screens/
     │   ├── pages/          # מסכים (Dashboard, Display, Login)
     │   └── store/          # ניהול מצב (Zustand)
     └── tailwind.config.js  # הגדרות עיצוב
+```
 
 🔮 תוכניות להמשך (Roadmap)
 [ ] העלאת תמונות רקע למסך הפתיחה.
